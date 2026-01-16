@@ -449,27 +449,25 @@
 					await deleteLinesByNetOnDocumentLayer(CREATE_LINE_NET);
 
 					// 在 PCB 上放置线段
-					await eda.pcb_PrimitiveLine
-						.create(
+					await eda.pcb_PrimitiveLine.create(
 							CREATE_LINE_NET,
 							EPCB_LayerId.DOCUMENT,
-							parseFloat(originX.value * MM_TO_MIL),
-							parseFloat(originY.value * MM_TO_MIL),
-							parseFloat(originX.value * MM_TO_MIL) + parseFloat(segmentLength.value * MM_TO_MIL),
-							parseFloat(originY.value * MM_TO_MIL),
-						)
-						.then(() => {
-							eda.sys_Message.showToastMessage(
-								'线段已放置，请切换回 PCB 编辑器测量线段长度，测量期间请勿缩放。',
-								ESYS_ToastMessageType.SUCCESS,
-							);
-						});
+							parseFloat(originX.value) * MM_TO_MIL,
+							parseFloat(originY.value) * MM_TO_MIL,
+							parseFloat(originX.value) * MM_TO_MIL + parseFloat(segmentLength.value) * MM_TO_MIL,
+							parseFloat(originY.value) * MM_TO_MIL
+						);
 
-					// 执行缩放，这里的scale好像和文档的参数描述不一致，没有细看
+					eda.sys_Message.showToastMessage(
+						'线段已放置，请切换回 PCB 编辑器测量线段长度，测量期间请勿缩放。',
+						ESYS_ToastMessageType.SUCCESS
+					);
+
+					// 执行缩放
 					await eda.dmt_EditorControl.zoomTo(
-						parseFloat(originX.value * MM_TO_MIL),
-						parseFloat(originY.value * MM_TO_MIL),
-						parseFloat(zoomScale.value) / 100,
+						parseFloat(originX.value) * MM_TO_MIL,
+						parseFloat(originY.value) * MM_TO_MIL,
+						parseFloat(zoomScale.value) / 100
 					);
 				} catch (err) {
 					showErrorToast(err);

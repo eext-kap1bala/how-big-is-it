@@ -1,10 +1,10 @@
 {
-	"name": "pro-api-sdk",
-	"uuid": "",
-	"displayName": "PRO API SDK",
-	"description": "嘉立创EDA & EasyEDA 专业版扩展 API 开发工具",
+	"name": "how-big-is-it",
+	"uuid": "0a51c245b8844ae49fd63f4c9808b419",
+	"displayName": "到底有多大？",
+	"description": "缩放显示比例，看看PCB在现实中到底有多大",
 	"version": "1.0.0",
-	"publisher": "JLCEDA <support@lceda.cn>",
+	"publisher": "卡皮巴拉",
 	"engines": {
 		"eda": "^2.3.0"
 	},
@@ -18,47 +18,34 @@
 	"images": {
 		"logo": "./images/logo.png"
 	},
-	"homepage": "https://pro.lceda.cn",
-	"bugs": "https://lceda.cn/page/feedback?originPage=other",
+	"homepage": "https://oshwhub.com/moth/works",
+	"bugs": "https://github.com/eext-kap1bala/howBigIsIt",
 	"activationEvents": {},
 	"entry": "./dist/index",
 	"dependentExtensions": {},
 	"headerMenus": {
-		"home": [
-			{
-				"id": "API SDK",
-				"title": "API SDK",
-				"menuItems": [
-					{
-						"id": "About",
-						"title": "About...",
-						"registerFn": "about"
-					}
-				]
-			}
-		],
-		"sch": [
-			{
-				"id": "API SDK",
-				"title": "API SDK",
-				"menuItems": [
-					{
-						"id": "About",
-						"title": "About...",
-						"registerFn": "about"
-					}
-				]
-			}
-		],
 		"pcb": [
 			{
-				"id": "API SDK",
-				"title": "API SDK",
+				"id": "howBigIsIt",
+				"title": "到底有多大",
 				"menuItems": [
 					{
-						"id": "About",
-						"title": "About...",
-						"registerFn": "about"
+						"id": "seeHowBigIsIt",
+						"title": "看看有多大",
+						"registerFn": "openHowBigIsItIFrame"
+					}
+				]
+			}
+		],
+		"footprint": [
+			{
+				"id": "howBigIsIt",
+				"title": "到底有多大",
+				"menuItems": [
+					{
+						"id": "seeHowBigIsIt",
+						"title": "看看有多大",
+						"registerFn": "openHowBigIsItIFrame"
 					}
 				]
 			}

@@ -1,11 +1,451 @@
 <!doctype html>
 <html lang="zh-Hans">
 	<head>
-		<title>Inner Frame</title>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>到底有多大</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style>
+			:root {
+				--bg: #f5f7fb;
+				--card: #ffffff;
+				--accent: #1890ff;
+				--muted: #6b7280;
+				--radius: 10px;
+				--gap: 18px;
+				--maxWidth: 980px;
+			}
+			html,
+			body {
+				margin: 0;
+				font-family: Inter, 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+				background: linear-gradient(180deg, var(--bg), #eef3fb 60%);
+				color: #111827;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+			}
+			.container {
+				max-width: var(--maxWidth);
+				margin: 10 auto;
+				padding: 12px;
+			}
+			.header {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+				margin-bottom: 12px;
+			}
+			.logo {
+				width: 56px;
+				height: 56px;
+				border-radius: 10px;
+				background: linear-gradient(135deg, var(--accent), #4db6ff);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: #fff;
+				font-weight: 700;
+				font-size: x-large;
+				box-shadow: 0 6px 18px rgba(24, 144, 255, 0.18);
+				flex: 0 0 56px;
+			}
+			h1 {
+				margin: 0;
+				font-size: 20px;
+			}
+			p.lead {
+				margin: 4px 0 0 0;
+				color: var(--muted);
+				font-size: 13px;
+			}
+
+			.board {
+				display: grid;
+				gap: var(--gap);
+				grid-template-columns: 1fr;
+			}
+
+			.step {
+				background: var(--card);
+				padding: 18px;
+				border-radius: var(--radius);
+				box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+				border: 1px solid rgba(15, 23, 42, 0.03);
+				position: relative;
+				overflow: hidden;
+			}
+
+			.step::before {
+				content: attr(data-step);
+				position: absolute;
+				left: 18px;
+				top: 18px;
+				width: 36px;
+				height: 36px;
+				border-radius: 50%;
+				background: linear-gradient(180deg, #fff, var(--card));
+				border: 2px solid rgba(0, 0, 0, 0.04);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-weight: 700;
+				color: var(--accent);
+				box-shadow: 0 6px 14px rgba(24, 144, 255, 0.06);
+				font-size: 14px;
+			}
+
+			.step .inner {
+				margin-left: 66px;
+			}
+
+			.step h3 {
+				margin: 0 0 6px 0;
+				font-size: 15px;
+			}
+			.step .desc {
+				margin: 0 0 12px 0;
+				color: var(--muted);
+				font-size: 13px;
+			}
+
+			.form-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+				gap: 12px;
+			}
+
+			label {
+				display: block;
+				font-size: 13px;
+				margin-bottom: 6px;
+				color: #344054;
+			}
+
+			input[type='number'] {
+				width: 100%;
+				padding: 10px 12px;
+				border: 1px solid #e6edf3;
+				border-radius: 8px;
+				font-size: 14px;
+				background: #fbfdff;
+				box-sizing: border-box;
+				transition:
+					box-shadow 0.12s,
+					border-color 0.12s;
+			}
+			input[type='number']:focus {
+				outline: none;
+				border-color: rgba(24, 144, 255, 0.9);
+				box-shadow: 0 6px 18px rgba(24, 144, 255, 0.08);
+			}
+
+			.controls {
+				display: flex;
+				gap: 10px;
+				margin-top: 12px;
+				align-items: center;
+				flex-wrap: wrap;
+			}
+
+			button {
+				padding: 10px 14px;
+				border-radius: 8px;
+				border: none;
+				cursor: pointer;
+				font-size: 14px;
+			}
+			.btn-primary {
+				background: var(--accent);
+				color: #fff;
+				box-shadow: 0 8px 24px rgba(24, 144, 255, 0.12);
+			}
+			.btn-ghost {
+				background: transparent;
+				color: #0f1724;
+				border: 1px solid #e6edf3;
+			}
+
+			.hint {
+				color: var(--muted);
+				font-size: 13px;
+			}
+
+			.result-row {
+				display: flex;
+				gap: 12px;
+				flex-wrap: wrap;
+				margin-top: 12px;
+			}
+
+			.chip {
+				background: #f8fafc;
+				border: 1px solid #eef2f7;
+				padding: 8px 12px;
+				border-radius: 999px;
+				font-size: 13px;
+				color: #0f1724;
+			}
+
+			.footer-note {
+				margin-top: 6px;
+				font-size: 12px;
+				color: var(--muted);
+			}
+
+			/* compact layout for small screens */
+			@media (max-width: 540px) {
+				.header {
+					gap: 10px;
+				}
+				.step::before {
+					left: 14px;
+					top: 14px;
+				}
+				.step .inner {
+					margin-left: 60px;
+				}
+				.container {
+					padding: 16px;
+				}
+			}
+
+			/* 暗色模式样式 */
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--bg: #0f1724;
+					--card: #1e293b;
+					--accent: #3ea6ff;
+					--muted: #9ca3af;
+					--red: #f87171;
+				}
+				body {
+					background: linear-gradient(180deg, var(--bg), #111827 60%);
+					color: #f9fafb;
+				}
+				.logo {
+					background: linear-gradient(135deg, var(--accent), #60b5ff);
+					box-shadow: 0 6px 18px rgba(62, 166, 255, 0.18);
+				}
+				.step {
+					background: var(--card);
+					box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+					border: 1px solid rgba(255, 255, 255, 0.06);
+				}
+				.step::before {
+					background: linear-gradient(135deg, #1e293b, var(--card));
+					border: 2px solid rgba(255, 255, 255, 0.06);
+					color: var(--accent);
+					box-shadow: 0 6px 14px rgba(62, 166, 255, 0.06);
+				}
+				label {
+					color: #cbd5e1;
+				}
+				input::-webkit-outer-spin-button,
+				input::-webkit-inner-spin-button {
+					-webkit-appearance: none !important;
+					margin: 0;
+				}
+
+				input[type='number'] {
+					background: #273449;
+					border: 1px solid #374151;
+					color: #f9fafb;
+				}
+				input[type='number']:focus {
+					border-color: rgba(62, 166, 255, 0.9);
+					box-shadow: 0 6px 18px rgba(62, 166, 255, 0.08);
+				}
+				.btn-primary {
+					background: var(--accent);
+					box-shadow: 0 8px 24px rgba(62, 166, 255, 0.12);
+				}
+				.btn-red {
+					color: #f9fafb;
+					background: var(--red);
+					box-shadow: 0 8px 24px rgba(62, 166, 255, 0.12);
+				}
+				.btn-ghost {
+					color: #f9fafb;
+					border: 1px solid #374151;
+				}
+				.chip {
+					background: #334155;
+					border: 1px solid #475569;
+					color: #f9fafb;
+				}
+			}
+		</style>
 	</head>
+
 	<body>
-		<p>这是一个示例 IFrame 页面</p>
+		<div class="container">
+			<div class="header">
+				<div class="logo">🔍</div>
+				<div>
+					<h1>到底有多大？</h1>
+					<p class="lead">缩放显示比例，看看PCB在现实中到底有多大。</p>
+				</div>
+			</div>
+
+			<div class="board">
+				<!-- Step 1 -->
+				<section class="step" data-step="1">
+					<div class="inner">
+						<h3>步骤 1 · 选择放置原点、线段长度和缩放比例</h3>
+						<p class="desc">设置相关参数，非必要可使用默认值。</p>
+
+						<div class="form-grid">
+							<div>
+								<label for="originX">原点 X (mm)</label>
+								<input id="originX" type="number" value="100" step="1" />
+							</div>
+							<div>
+								<label for="originY">原点 Y (mm)</label>
+								<input id="originY" type="number" value="100" step="1" />
+							</div>
+							<div>
+								<label for="segmentLength">线段长度 (mm)</label>
+								<input id="segmentLength" type="number" value="8" min="1" step="1" />
+							</div>
+						</div>
+
+						<div class="form-grid" style="margin-top: 16px">
+							<div>
+								<label for="zoomScale">缩放比例（%）</label>
+								<input id="zoomScale" type="number" value="1000" min="1" step="1" />
+							</div>
+						</div>
+
+						<div class="controls">
+							<button id="placeSegmentBtn" class="btn-primary">在 PCB 上放置线段并缩放</button>
+							<div class="hint">点击后请切换回 PCB 编辑器测量线段长度，测量期间请勿缩放。</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- Step 2 -->
+				<section class="step" data-step="2">
+					<div class="inner">
+						<h3>步骤 2 · 填入显示器上的实际长度</h3>
+						<p class="desc">测量出屏幕上所放置线段的真实长度（单位为毫米）并填写在下方。</p>
+
+						<div class="form-grid">
+							<div>
+								<label for="displayActualLength">实际长度 (mm)</label>
+								<input id="displayActualLength" type="number" value="10" min="0" step="0.01" />
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- Step 3 -->
+				<section class="step" data-step="3">
+					<div class="inner">
+						<h3>步骤 3 · 执行缩放并查看结果</h3>
+						<p class="desc">核对长度并执行缩放操作。</p>
+
+						<div class="controls">
+							<button id="showConfigBtn" class="btn-primary">看看到底有多大</button>
+							<button id="reset" class="btn-red">重置输入框默认值</button>
+						</div>
+					</div>
+				</section>
+			</div>
+		</div>
+
+		<script>
+			// 监听输入框的变动，并实时将值保存到 localStorage
+			const keys = {
+				originX: 'pcb:originX',
+				originY: 'pcb:originY',
+				segmentLength: 'pcb:segmentLength',
+				displayActualLength: 'pcb:displayActualLength',
+				zoomScale: 'pcb:zoomScale',
+			};
+
+			const el = (id) => document.getElementById(id);
+
+			const originX = el('originX');
+			const originY = el('originY');
+			const segmentLength = el('segmentLength');
+			const displayActualLength = el('displayActualLength');
+			const placeSegmentBtn = el('placeSegmentBtn');
+			const showConfigBtn = el('showConfigBtn');
+
+			// 缩放比率
+			const zoomScale = el('zoomScale');
+
+			// 从 localStorage 恢复
+			function restore() {
+				if (localStorage.getItem(keys.originX) !== null) originX.value = localStorage.getItem(keys.originX);
+				if (localStorage.getItem(keys.originY) !== null) originY.value = localStorage.getItem(keys.originY);
+				if (localStorage.getItem(keys.segmentLength) !== null) segmentLength.value = localStorage.getItem(keys.segmentLength);
+				if (localStorage.getItem(keys.displayActualLength) !== null)
+					displayActualLength.value = localStorage.getItem(keys.displayActualLength);
+
+				if (localStorage.getItem(keys.zoomScale) !== null) zoomScale.value = localStorage.getItem(keys.zoomScale);
+			}
+			restore();
+
+			// 保存到 localStorage
+			function saveAll() {
+				localStorage.setItem(keys.originX, originX.value);
+				localStorage.setItem(keys.originY, originY.value);
+				localStorage.setItem(keys.segmentLength, segmentLength.value);
+				localStorage.setItem(keys.displayActualLength, displayActualLength.value);
+
+				localStorage.setItem(keys.zoomScale, zoomScale.value);
+			}
+
+			// 对输入框变化进行监听并保存
+			[originX, originY, segmentLength, displayActualLength, zoomScale].forEach((input) => {
+				input.addEventListener('input', saveAll);
+			});
+
+			// 点击“重置输入框默认值” -> 清除 localStorage 并恢复默认值
+			document.getElementById('reset').addEventListener('click', () => {
+				// 清除当前 origin 下的所有 localStorage 项
+				localStorage.clear();
+
+				// 将输入框恢复为默认值
+				originX.value = '100';
+				originY.value = '100';
+				segmentLength.value = '8';
+				displayActualLength.value = '10';
+
+				zoomScale.value = '1000';
+
+				// 将默认值保存回 localStorage（可选，便于下一次打开时恢复）
+				saveAll();
+			});
+
+			// 点击“在 PCB 上放置线段并缩放”按钮
+			placeSegmentBtn.addEventListener('click', () => {
+				// 在 PCB 上放置线段
+				eda.pcb_PrimitiveLine.create(
+					'h0wB!g!$!t',
+					EPCB_LayerId.DOCUMENT,
+					parseFloat(originX.value * 39.37),
+					parseFloat(originY.value * 39.37),
+					parseFloat(originX.value * 39.37) + parseFloat(segmentLength.value * 39.37),
+					parseFloat(originY.value * 39.37),
+				);
+				// 执行缩放，这里的scale好像和文档的参数描述不一致，没有细看
+				eda.dmt_EditorControl.zoomTo(parseFloat(originX.value * 39.37), parseFloat(originY.value * 39.37), parseFloat(zoomScale.value) / 100);
+			});
+
+			// 点击“看看到底有多大”按钮
+			showConfigBtn.addEventListener('click', () => {
+				// 计算实际缩放比例
+				const segmentLengthMil = parseFloat(segmentLength.value * 39.37);
+				const displayLengthMil = parseFloat(displayActualLength.value * 39.37);
+				const actualZoomScale = (segmentLengthMil / displayLengthMil) * zoomScale.value;
+
+				// 执行缩放
+				eda.dmt_EditorControl.zoomTo(0, 0, actualZoomScale / 100);
+
+				// 显示结果
+				eda.sys_Message.showToastMessage(`已按实际长度 ${segmentLength.value} mm 进行缩放，当前缩放比例为 ${actualZoomScale}%。`);
+			});
+		</script>
 	</body>
 </html>

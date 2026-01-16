@@ -485,7 +485,7 @@
 					// 计算实际缩放比例
 					const _segmentLength = parseFloat(segmentLength.value);
 					const _displayActualLength = parseFloat(displayActualLength.value);
-					const actualZoomScale = (_segmentLength / _displayActualLength) * zoomScale.value;
+					const actualZoomScale = (_segmentLength / _displayActualLength) * _zoomScale;
 
 					// 执行缩放
 					await eda.dmt_EditorControl.zoomTo(0, 0, actualZoomScale / 100);

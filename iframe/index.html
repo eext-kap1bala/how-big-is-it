@@ -377,6 +377,9 @@
 		</div>
 
 		<script>
+			const CREATE_LINE_NET = 'h0wB!g!$!t';
+			const MM_TO_MIL = 39.37;
+
 			// 根据 net 删除 Document 层的线段
 			async function deleteLinesByNetOnDocumentLayer(net) {
 				try {
@@ -443,34 +446,31 @@
 			placeSegmentBtn.addEventListener('click', async () => {
 				try {
 					// 先删除之前放置的线段，避免重复放置
-					await deleteLinesByNetOnDocumentLayer('h0wB!g!$!t');
+					await deleteLinesByNetOnDocumentLayer(CREATE_LINE_NET);
 
 					// 在 PCB 上放置线段
 					await eda.pcb_PrimitiveLine
 						.create(
-							'h0wB!g!$!t',
+							CREATE_LINE_NET,
 							EPCB_LayerId.DOCUMENT,
-							parseFloat(originX.value * 39.37),
-							parseFloat(originY.value * 39.37),
-							parseFloat(originX.value * 39.37) + parseFloat(segmentLength.value * 39.37),
-							parseFloat(originY.value * 39.37),
+							parseFloat(originX.value * MM_TO_MIL),
+							parseFloat(originY.value * MM_TO_MIL),
+							parseFloat(originX.value * MM_TO_MIL) + parseFloat(segmentLength.value * MM_TO_MIL),
+							parseFloat(originY.value * MM_TO_MIL),
 						)
 						.then(() => {
 							eda.sys_Message.showToastMessage(
 								'线段已放置，请切换回 PCB 编辑器测量线段长度，测量期间请勿缩放。',
 								ESYS_ToastMessageType.SUCCESS,
 							);
-						})
-						.catch((err) => {
-							showErrorToast(err);
 						});
 
 					// 执行缩放，这里的scale好像和文档的参数描述不一致，没有细看
-					await eda.dmt_EditorControl
-						.zoomTo(parseFloat(originX.value * 39.37), parseFloat(originY.value * 39.37), parseFloat(zoomScale.value) / 100)
-						.catch((err) => {
-							showErrorToast(err);
-						});
+					await eda.dmt_EditorControl.zoomTo(
+						parseFloat(originX.value * MM_TO_MIL),
+						parseFloat(originY.value * MM_TO_MIL),
+						parseFloat(zoomScale.value) / 100,
+					);
 				} catch (err) {
 					showErrorToast(err);
 				}
@@ -499,7 +499,7 @@
 					showErrorToast(err);
 				} finally {
 					// 删除放置的线段
-					deleteLinesByNetOnDocumentLayer('h0wB!g!$!t');
+					deleteLinesByNetOnDocumentLayer(CREATE_LINE_NET);
 				}
 			});
 

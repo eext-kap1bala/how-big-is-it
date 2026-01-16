@@ -14,6 +14,7 @@
 				--gap: 18px;
 				--maxWidth: 980px;
 			}
+
 			html,
 			body {
 				margin: 0;
@@ -23,17 +24,20 @@
 				-webkit-font-smoothing: antialiased;
 				-moz-osx-font-smoothing: grayscale;
 			}
+
 			.container {
 				max-width: var(--maxWidth);
 				margin: 10 auto;
 				padding: 12px;
 			}
+
 			.header {
 				display: flex;
 				align-items: center;
 				gap: 16px;
 				margin-bottom: 12px;
 			}
+
 			.logo {
 				width: 56px;
 				height: 56px;
@@ -48,10 +52,12 @@
 				box-shadow: 0 6px 18px rgba(24, 144, 255, 0.18);
 				flex: 0 0 56px;
 			}
+
 			h1 {
 				margin: 0;
 				font-size: 20px;
 			}
+
 			p.lead {
 				margin: 4px 0 0 0;
 				color: var(--muted);
@@ -101,6 +107,7 @@
 				margin: 0 0 6px 0;
 				font-size: 15px;
 			}
+
 			.step .desc {
 				margin: 0 0 12px 0;
 				color: var(--muted);
@@ -132,6 +139,7 @@
 					box-shadow 0.12s,
 					border-color 0.12s;
 			}
+
 			input[type='number']:focus {
 				outline: none;
 				border-color: rgba(24, 144, 255, 0.9);
@@ -153,11 +161,13 @@
 				cursor: pointer;
 				font-size: 14px;
 			}
+
 			.btn-primary {
 				background: var(--accent);
 				color: #fff;
 				box-shadow: 0 8px 24px rgba(24, 144, 255, 0.12);
 			}
+
 			.btn-ghost {
 				background: transparent;
 				color: #0f1724;
@@ -196,13 +206,16 @@
 				.header {
 					gap: 10px;
 				}
+
 				.step::before {
 					left: 14px;
 					top: 14px;
 				}
+
 				.step .inner {
 					margin-left: 60px;
 				}
+
 				.container {
 					padding: 16px;
 				}
@@ -217,28 +230,34 @@
 					--muted: #9ca3af;
 					--red: #f87171;
 				}
+
 				body {
 					background: linear-gradient(180deg, var(--bg), #111827 60%);
 					color: #f9fafb;
 				}
+
 				.logo {
 					background: linear-gradient(135deg, var(--accent), #60b5ff);
 					box-shadow: 0 6px 18px rgba(62, 166, 255, 0.18);
 				}
+
 				.step {
 					background: var(--card);
 					box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 					border: 1px solid rgba(255, 255, 255, 0.06);
 				}
+
 				.step::before {
 					background: linear-gradient(135deg, #1e293b, var(--card));
 					border: 2px solid rgba(255, 255, 255, 0.06);
 					color: var(--accent);
 					box-shadow: 0 6px 14px rgba(62, 166, 255, 0.06);
 				}
+
 				label {
 					color: #cbd5e1;
 				}
+
 				input::-webkit-outer-spin-button,
 				input::-webkit-inner-spin-button {
 					-webkit-appearance: none !important;
@@ -250,23 +269,28 @@
 					border: 1px solid #374151;
 					color: #f9fafb;
 				}
+
 				input[type='number']:focus {
 					border-color: rgba(62, 166, 255, 0.9);
 					box-shadow: 0 6px 18px rgba(62, 166, 255, 0.08);
 				}
+
 				.btn-primary {
 					background: var(--accent);
 					box-shadow: 0 8px 24px rgba(62, 166, 255, 0.12);
 				}
+
 				.btn-red {
 					color: #f9fafb;
 					background: var(--red);
 					box-shadow: 0 8px 24px rgba(62, 166, 255, 0.12);
 				}
+
 				.btn-ghost {
 					color: #f9fafb;
 					border: 1px solid #374151;
 				}
+
 				.chip {
 					background: #334155;
 					border: 1px solid #475569;
@@ -353,6 +377,24 @@
 		</div>
 
 		<script>
+			// 根据 net 删除 Document 层的线段
+			function deleteLinesByNetOnDocumentLayer(net) {
+				eda.pcb_PrimitiveLine
+					.getAll(net, EPCB_LayerId.DOCUMENT)
+					.then((e) => {
+						eda.pcb_PrimitiveLine.delete(e);
+					})
+					.catch((err) => {
+						console.error(err);
+					});
+			}
+
+			// 显示错误消息 Toast 封装
+			function showErrorToast(err) {
+				const errText = err.name + ': ' + err.message;
+				eda.sys_Message.showToastMessage(errText, ESYS_ToastMessageType.ERROR);
+			}
+
 			// 监听输入框的变动，并实时将值保存到 localStorage
 			const keys = {
 				originX: 'pcb:originX',
@@ -420,31 +462,54 @@
 
 			// 点击“在 PCB 上放置线段并缩放”按钮
 			placeSegmentBtn.addEventListener('click', () => {
-				// 在 PCB 上放置线段
-				eda.pcb_PrimitiveLine.create(
-					'h0wB!g!$!t',
-					EPCB_LayerId.DOCUMENT,
-					parseFloat(originX.value * 39.37),
-					parseFloat(originY.value * 39.37),
-					parseFloat(originX.value * 39.37) + parseFloat(segmentLength.value * 39.37),
-					parseFloat(originY.value * 39.37),
-				);
-				// 执行缩放，这里的scale好像和文档的参数描述不一致，没有细看
-				eda.dmt_EditorControl.zoomTo(parseFloat(originX.value * 39.37), parseFloat(originY.value * 39.37), parseFloat(zoomScale.value) / 100);
+				try {
+					// 先删除之前放置的线段，避免重复放置
+					deleteLinesByNetOnDocumentLayer('h0wB!g!$!t');
+
+					// 在 PCB 上放置线段
+					eda.pcb_PrimitiveLine.create(
+						'h0wB!g!$!t',
+						EPCB_LayerId.DOCUMENT,
+						parseFloat(originX.value * 39.37),
+						parseFloat(originY.value * 39.37),
+						parseFloat(originX.value * 39.37) + parseFloat(segmentLength.value * 39.37),
+						parseFloat(originY.value * 39.37),
+					);
+
+					// 执行缩放，这里的scale好像和文档的参数描述不一致，没有细看
+					eda.dmt_EditorControl.zoomTo(
+						parseFloat(originX.value * 39.37),
+						parseFloat(originY.value * 39.37),
+						parseFloat(zoomScale.value) / 100,
+					);
+				} catch (err) {
+					showErrorToast(err);
+					console.error(err);
+				} finally {
+					eda.sys_Message.showToastMessage('成功放置线段，请测量线段长度，测量期间请勿缩放。', ESYS_ToastMessageType.SUCCESS);
+				}
 			});
 
 			// 点击“看看到底有多大”按钮
 			showConfigBtn.addEventListener('click', () => {
-				// 计算实际缩放比例
-				const segmentLengthMil = parseFloat(segmentLength.value * 39.37);
-				const displayLengthMil = parseFloat(displayActualLength.value * 39.37);
-				const actualZoomScale = (segmentLengthMil / displayLengthMil) * zoomScale.value;
+				try {
+					// 计算实际缩放比例
+					const segmentLengthMil = parseFloat(segmentLength.value * 39.37);
+					const displayLengthMil = parseFloat(displayActualLength.value * 39.37);
+					const actualZoomScale = (segmentLengthMil / displayLengthMil) * zoomScale.value;
 
-				// 执行缩放
-				eda.dmt_EditorControl.zoomTo(0, 0, actualZoomScale / 100);
+					// 执行缩放
+					eda.dmt_EditorControl.zoomTo(0, 0, actualZoomScale / 100);
 
-				// 显示结果
-				eda.sys_Message.showToastMessage(`已按实际长度 ${segmentLength.value} mm 进行缩放，当前缩放比例为 ${actualZoomScale}%。`);
+					// 显示结果
+					eda.sys_Message.showToastMessage(`已按实际长度 ${segmentLength.value} mm 进行缩放，当前缩放比例为 ${actualZoomScale}%。`);
+				} catch (err) {
+					showErrorToast(err);
+					console.error(err);
+				} finally {
+					// 删除放置的线段
+					deleteLinesByNetOnDocumentLayer('h0wB!g!$!t');
+				}
 			});
 		</script>
 	</body>

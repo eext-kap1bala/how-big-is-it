@@ -14,6 +14,7 @@
 				--gap: 18px;
 				--maxWidth: 980px;
 			}
+
 			html,
 			body {
 				margin: 0;
@@ -23,17 +24,20 @@
 				-webkit-font-smoothing: antialiased;
 				-moz-osx-font-smoothing: grayscale;
 			}
+
 			.container {
 				max-width: var(--maxWidth);
 				margin: 10 auto;
 				padding: 12px;
 			}
+
 			.header {
 				display: flex;
 				align-items: center;
 				gap: 16px;
 				margin-bottom: 12px;
 			}
+
 			.logo {
 				width: 56px;
 				height: 56px;
@@ -48,10 +52,12 @@
 				box-shadow: 0 6px 18px rgba(24, 144, 255, 0.18);
 				flex: 0 0 56px;
 			}
+
 			h1 {
 				margin: 0;
 				font-size: 20px;
 			}
+
 			p.lead {
 				margin: 4px 0 0 0;
 				color: var(--muted);
@@ -101,6 +107,7 @@
 				margin: 0 0 6px 0;
 				font-size: 15px;
 			}
+
 			.step .desc {
 				margin: 0 0 12px 0;
 				color: var(--muted);
@@ -132,6 +139,7 @@
 					box-shadow 0.12s,
 					border-color 0.12s;
 			}
+
 			input[type='number']:focus {
 				outline: none;
 				border-color: rgba(24, 144, 255, 0.9);
@@ -153,11 +161,13 @@
 				cursor: pointer;
 				font-size: 14px;
 			}
+
 			.btn-primary {
 				background: var(--accent);
 				color: #fff;
 				box-shadow: 0 8px 24px rgba(24, 144, 255, 0.12);
 			}
+
 			.btn-ghost {
 				background: transparent;
 				color: #0f1724;
@@ -196,13 +206,16 @@
 				.header {
 					gap: 10px;
 				}
+
 				.step::before {
 					left: 14px;
 					top: 14px;
 				}
+
 				.step .inner {
 					margin-left: 60px;
 				}
+
 				.container {
 					padding: 16px;
 				}
@@ -217,28 +230,34 @@
 					--muted: #9ca3af;
 					--red: #f87171;
 				}
+
 				body {
 					background: linear-gradient(180deg, var(--bg), #111827 60%);
 					color: #f9fafb;
 				}
+
 				.logo {
 					background: linear-gradient(135deg, var(--accent), #60b5ff);
 					box-shadow: 0 6px 18px rgba(62, 166, 255, 0.18);
 				}
+
 				.step {
 					background: var(--card);
 					box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 					border: 1px solid rgba(255, 255, 255, 0.06);
 				}
+
 				.step::before {
 					background: linear-gradient(135deg, #1e293b, var(--card));
 					border: 2px solid rgba(255, 255, 255, 0.06);
 					color: var(--accent);
 					box-shadow: 0 6px 14px rgba(62, 166, 255, 0.06);
 				}
+
 				label {
 					color: #cbd5e1;
 				}
+
 				input::-webkit-outer-spin-button,
 				input::-webkit-inner-spin-button {
 					-webkit-appearance: none !important;
@@ -250,23 +269,28 @@
 					border: 1px solid #374151;
 					color: #f9fafb;
 				}
+
 				input[type='number']:focus {
 					border-color: rgba(62, 166, 255, 0.9);
 					box-shadow: 0 6px 18px rgba(62, 166, 255, 0.08);
 				}
+
 				.btn-primary {
 					background: var(--accent);
 					box-shadow: 0 8px 24px rgba(62, 166, 255, 0.12);
 				}
+
 				.btn-red {
 					color: #f9fafb;
 					background: var(--red);
 					box-shadow: 0 8px 24px rgba(62, 166, 255, 0.12);
 				}
+
 				.btn-ghost {
 					color: #f9fafb;
 					border: 1px solid #374151;
 				}
+
 				.chip {
 					background: #334155;
 					border: 1px solid #475569;
@@ -353,6 +377,30 @@
 		</div>
 
 		<script>
+			// 用于临时创建线段的唯一网络名称，以避免与用户创建的网络冲突
+			const CREATE_LINE_NET = 'h0wB!g!$!t';
+
+			const MM_TO_MIL = 39.37;
+
+			// 根据 net 删除 Document 层的线段
+			async function deleteLinesByNetOnDocumentLayer(net) {
+				try {
+					const lines = await eda.pcb_PrimitiveLine.getAll(net, EPCB_LayerId.DOCUMENT);
+					if (lines && lines.length > 0) {
+						await eda.pcb_PrimitiveLine.delete(lines);
+					}
+				} catch (err) {
+					showErrorToast(err);
+				}
+			}
+
+			// 显示错误消息 Toast 封装
+			function showErrorToast(err) {
+				const errText = err.name + ': ' + err.message;
+				eda.sys_Message.showToastMessage(errText, ESYS_ToastMessageType.ERROR);
+				console.error(err);
+			}
+
 			// 监听输入框的变动，并实时将值保存到 localStorage
 			const keys = {
 				originX: 'pcb:originX',
@@ -363,15 +411,12 @@
 			};
 
 			const el = (id) => document.getElementById(id);
-
 			const originX = el('originX');
 			const originY = el('originY');
 			const segmentLength = el('segmentLength');
 			const displayActualLength = el('displayActualLength');
 			const placeSegmentBtn = el('placeSegmentBtn');
 			const showConfigBtn = el('showConfigBtn');
-
-			// 缩放比率
 			const zoomScale = el('zoomScale');
 
 			// 从 localStorage 恢复
@@ -381,7 +426,6 @@
 				if (localStorage.getItem(keys.segmentLength) !== null) segmentLength.value = localStorage.getItem(keys.segmentLength);
 				if (localStorage.getItem(keys.displayActualLength) !== null)
 					displayActualLength.value = localStorage.getItem(keys.displayActualLength);
-
 				if (localStorage.getItem(keys.zoomScale) !== null) zoomScale.value = localStorage.getItem(keys.zoomScale);
 			}
 			restore();
@@ -392,13 +436,70 @@
 				localStorage.setItem(keys.originY, originY.value);
 				localStorage.setItem(keys.segmentLength, segmentLength.value);
 				localStorage.setItem(keys.displayActualLength, displayActualLength.value);
-
 				localStorage.setItem(keys.zoomScale, zoomScale.value);
 			}
 
 			// 对输入框变化进行监听并保存
 			[originX, originY, segmentLength, displayActualLength, zoomScale].forEach((input) => {
 				input.addEventListener('input', saveAll);
+			});
+
+			// 点击“在 PCB 上放置线段并缩放”按钮
+			placeSegmentBtn.addEventListener('click', async () => {
+				try {
+					// 先删除之前放置的线段，避免重复放置
+					await deleteLinesByNetOnDocumentLayer(CREATE_LINE_NET);
+
+					// 获取输入值
+					const originXValueMil = parseFloat(originX.value) * MM_TO_MIL;
+					const originYValueMil = parseFloat(originY.value) * MM_TO_MIL;
+					const segmentLengthMil = parseFloat(segmentLength.value) * MM_TO_MIL;
+					const zoomScaleValue = parseFloat(zoomScale.value);
+
+					// 在 PCB 上放置线段
+					await eda.pcb_PrimitiveLine.create(
+						CREATE_LINE_NET,
+						EPCB_LayerId.DOCUMENT,
+						originXValueMil,
+						originYValueMil,
+						originXValueMil + segmentLengthMil,
+						originYValueMil,
+					);
+
+					eda.sys_Message.showToastMessage('线段已放置，请测量线段长度，测量期间请勿缩放。', ESYS_ToastMessageType.SUCCESS);
+
+					// 执行缩放
+					await eda.dmt_EditorControl.zoomTo(originXValueMil, originYValueMil, zoomScaleValue / 100);
+				} catch (err) {
+					showErrorToast(err);
+				}
+			});
+
+			// 点击“看看到底有多大”按钮
+			showConfigBtn.addEventListener('click', async () => {
+				try {
+					// 获取当前缩放比例
+					const _zoomScale = parseFloat(zoomScale.value);
+
+					// 计算实际缩放比例
+					const segmentLengthValue = parseFloat(segmentLength.value);
+					const displayActualLengthValue = parseFloat(displayActualLength.value);
+					const actualZoomScale = (segmentLengthValue / displayActualLengthValue) * _zoomScale;
+
+					// 执行缩放
+					await eda.dmt_EditorControl.zoomTo(0, 0, actualZoomScale / 100);
+
+					// 显示结果
+					eda.sys_Message.showToastMessage(
+						`放置长度 ${segmentLengthValue.toFixed(2)} mm，显示长度 ${displayActualLengthValue.toFixed(2)} mm，原缩放比例为 ${_zoomScale.toFixed(2)}%，更改缩放比例为 ${actualZoomScale.toFixed(2)}%。`,
+						ESYS_ToastMessageType.SUCCESS,
+					);
+				} catch (err) {
+					showErrorToast(err);
+				} finally {
+					// 删除放置的线段
+					await deleteLinesByNetOnDocumentLayer(CREATE_LINE_NET);
+				}
 			});
 
 			// 点击“重置输入框默认值” -> 清除 localStorage 并恢复默认值
@@ -411,40 +512,10 @@
 				originY.value = '100';
 				segmentLength.value = '8';
 				displayActualLength.value = '10';
-
 				zoomScale.value = '1000';
 
 				// 将默认值保存回 localStorage（可选，便于下一次打开时恢复）
 				saveAll();
-			});
-
-			// 点击“在 PCB 上放置线段并缩放”按钮
-			placeSegmentBtn.addEventListener('click', () => {
-				// 在 PCB 上放置线段
-				eda.pcb_PrimitiveLine.create(
-					'h0wB!g!$!t',
-					EPCB_LayerId.DOCUMENT,
-					parseFloat(originX.value * 39.37),
-					parseFloat(originY.value * 39.37),
-					parseFloat(originX.value * 39.37) + parseFloat(segmentLength.value * 39.37),
-					parseFloat(originY.value * 39.37),
-				);
-				// 执行缩放，这里的scale好像和文档的参数描述不一致，没有细看
-				eda.dmt_EditorControl.zoomTo(parseFloat(originX.value * 39.37), parseFloat(originY.value * 39.37), parseFloat(zoomScale.value) / 100);
-			});
-
-			// 点击“看看到底有多大”按钮
-			showConfigBtn.addEventListener('click', () => {
-				// 计算实际缩放比例
-				const segmentLengthMil = parseFloat(segmentLength.value * 39.37);
-				const displayLengthMil = parseFloat(displayActualLength.value * 39.37);
-				const actualZoomScale = (segmentLengthMil / displayLengthMil) * zoomScale.value;
-
-				// 执行缩放
-				eda.dmt_EditorControl.zoomTo(0, 0, actualZoomScale / 100);
-
-				// 显示结果
-				eda.sys_Message.showToastMessage(`已按实际长度 ${segmentLength.value} mm 进行缩放，当前缩放比例为 ${actualZoomScale}%。`);
 			});
 		</script>
 	</body>

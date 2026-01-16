@@ -19,7 +19,7 @@
 		"logo": "./images/logo.png"
 	},
 	"homepage": "https://oshwhub.com/moth/works",
-	"bugs": "https://github.com/eext-kap1bala/howBigIsIt",
+	"bugs": "https://github.com/eext-kap1bala/how-big-is-it",
 	"activationEvents": {},
 	"entry": "./dist/index",
 	"dependentExtensions": {},

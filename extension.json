@@ -3,7 +3,7 @@
 	"uuid": "0a51c245b8844ae49fd63f4c9808b419",
 	"displayName": "到底有多大？",
 	"description": "缩放显示比例，看看PCB在现实中到底有多大",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"publisher": "卡皮巴拉",
 	"engines": {
 		"eda": "^2.3.0"

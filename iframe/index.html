@@ -378,21 +378,22 @@
 
 		<script>
 			// 根据 net 删除 Document 层的线段
-			function deleteLinesByNetOnDocumentLayer(net) {
-				eda.pcb_PrimitiveLine
-					.getAll(net, EPCB_LayerId.DOCUMENT)
-					.then((e) => {
-						eda.pcb_PrimitiveLine.delete(e);
-					})
-					.catch((err) => {
-						console.error(err);
-					});
+			async function deleteLinesByNetOnDocumentLayer(net) {
+				try {
+					const lines = await eda.pcb_PrimitiveLine.getAll(net, EPCB_LayerId.DOCUMENT);
+					if (lines && lines.length > 0) {
+						await eda.pcb_PrimitiveLine.delete(lines);
+					}
+				} catch (err) {
+					showErrorToast(err);
+				}
 			}
 
 			// 显示错误消息 Toast 封装
 			function showErrorToast(err) {
 				const errText = err.name + ': ' + err.message;
 				eda.sys_Message.showToastMessage(errText, ESYS_ToastMessageType.ERROR);
+				console.error(err);
 			}
 
 			// 监听输入框的变动，并实时将值保存到 localStorage
@@ -405,15 +406,12 @@
 			};
 
 			const el = (id) => document.getElementById(id);
-
 			const originX = el('originX');
 			const originY = el('originY');
 			const segmentLength = el('segmentLength');
 			const displayActualLength = el('displayActualLength');
 			const placeSegmentBtn = el('placeSegmentBtn');
 			const showConfigBtn = el('showConfigBtn');
-
-			// 缩放比率
 			const zoomScale = el('zoomScale');
 
 			// 从 localStorage 恢复
@@ -423,7 +421,6 @@
 				if (localStorage.getItem(keys.segmentLength) !== null) segmentLength.value = localStorage.getItem(keys.segmentLength);
 				if (localStorage.getItem(keys.displayActualLength) !== null)
 					displayActualLength.value = localStorage.getItem(keys.displayActualLength);
-
 				if (localStorage.getItem(keys.zoomScale) !== null) zoomScale.value = localStorage.getItem(keys.zoomScale);
 			}
 			restore();
@@ -434,13 +431,76 @@
 				localStorage.setItem(keys.originY, originY.value);
 				localStorage.setItem(keys.segmentLength, segmentLength.value);
 				localStorage.setItem(keys.displayActualLength, displayActualLength.value);
-
 				localStorage.setItem(keys.zoomScale, zoomScale.value);
 			}
 
 			// 对输入框变化进行监听并保存
 			[originX, originY, segmentLength, displayActualLength, zoomScale].forEach((input) => {
 				input.addEventListener('input', saveAll);
+			});
+
+			// 点击“在 PCB 上放置线段并缩放”按钮
+			placeSegmentBtn.addEventListener('click', async () => {
+				try {
+					// 先删除之前放置的线段，避免重复放置
+					await deleteLinesByNetOnDocumentLayer('h0wB!g!$!t');
+
+					// 在 PCB 上放置线段
+					await eda.pcb_PrimitiveLine
+						.create(
+							'h0wB!g!$!t',
+							EPCB_LayerId.DOCUMENT,
+							parseFloat(originX.value * 39.37),
+							parseFloat(originY.value * 39.37),
+							parseFloat(originX.value * 39.37) + parseFloat(segmentLength.value * 39.37),
+							parseFloat(originY.value * 39.37),
+						)
+						.then(() => {
+							eda.sys_Message.showToastMessage(
+								'线段已放置，请切换回 PCB 编辑器测量线段长度，测量期间请勿缩放。',
+								ESYS_ToastMessageType.SUCCESS,
+							);
+						})
+						.catch((err) => {
+							showErrorToast(err);
+						});
+
+					// 执行缩放，这里的scale好像和文档的参数描述不一致，没有细看
+					await eda.dmt_EditorControl
+						.zoomTo(parseFloat(originX.value * 39.37), parseFloat(originY.value * 39.37), parseFloat(zoomScale.value) / 100)
+						.catch((err) => {
+							showErrorToast(err);
+						});
+				} catch (err) {
+					showErrorToast(err);
+				}
+			});
+
+			// 点击“看看到底有多大”按钮
+			showConfigBtn.addEventListener('click', () => {
+				try {
+					// 获取当前缩放比例
+					const _zoomScale = parseFloat(zoomScale.value);
+
+					// 计算实际缩放比例
+					const _segmentLength = parseFloat(segmentLength.value);
+					const _displayActualLength = parseFloat(displayActualLength.value);
+					const actualZoomScale = (_segmentLength / _displayActualLength) * zoomScale.value;
+
+					// 执行缩放
+					eda.dmt_EditorControl.zoomTo(0, 0, actualZoomScale / 100);
+
+					// 显示结果
+					eda.sys_Message.showToastMessage(
+						`测量长度 ${_segmentLength.toFixed(2)} mm，显示长度 ${_displayActualLength.toFixed(2)} mm，原缩放比例为 ${_zoomScale.toFixed(2)}%，更改缩放比例为 ${actualZoomScale.toFixed(2)}%。`,
+						ESYS_ToastMessageType.SUCCESS,
+					);
+				} catch (err) {
+					showErrorToast(err);
+				} finally {
+					// 删除放置的线段
+					deleteLinesByNetOnDocumentLayer('h0wB!g!$!t');
+				}
 			});
 
 			// 点击“重置输入框默认值” -> 清除 localStorage 并恢复默认值
@@ -453,63 +513,10 @@
 				originY.value = '100';
 				segmentLength.value = '8';
 				displayActualLength.value = '10';
-
 				zoomScale.value = '1000';
 
 				// 将默认值保存回 localStorage（可选，便于下一次打开时恢复）
 				saveAll();
-			});
-
-			// 点击“在 PCB 上放置线段并缩放”按钮
-			placeSegmentBtn.addEventListener('click', () => {
-				try {
-					// 先删除之前放置的线段，避免重复放置
-					deleteLinesByNetOnDocumentLayer('h0wB!g!$!t');
-
-					// 在 PCB 上放置线段
-					eda.pcb_PrimitiveLine.create(
-						'h0wB!g!$!t',
-						EPCB_LayerId.DOCUMENT,
-						parseFloat(originX.value * 39.37),
-						parseFloat(originY.value * 39.37),
-						parseFloat(originX.value * 39.37) + parseFloat(segmentLength.value * 39.37),
-						parseFloat(originY.value * 39.37),
-					);
-
-					// 执行缩放，这里的scale好像和文档的参数描述不一致，没有细看
-					eda.dmt_EditorControl.zoomTo(
-						parseFloat(originX.value * 39.37),
-						parseFloat(originY.value * 39.37),
-						parseFloat(zoomScale.value) / 100,
-					);
-				} catch (err) {
-					showErrorToast(err);
-					console.error(err);
-				} finally {
-					eda.sys_Message.showToastMessage('成功放置线段，请测量线段长度，测量期间请勿缩放。', ESYS_ToastMessageType.SUCCESS);
-				}
-			});
-
-			// 点击“看看到底有多大”按钮
-			showConfigBtn.addEventListener('click', () => {
-				try {
-					// 计算实际缩放比例
-					const segmentLengthMil = parseFloat(segmentLength.value * 39.37);
-					const displayLengthMil = parseFloat(displayActualLength.value * 39.37);
-					const actualZoomScale = (segmentLengthMil / displayLengthMil) * zoomScale.value;
-
-					// 执行缩放
-					eda.dmt_EditorControl.zoomTo(0, 0, actualZoomScale / 100);
-
-					// 显示结果
-					eda.sys_Message.showToastMessage(`已按实际长度 ${segmentLength.value} mm 进行缩放，当前缩放比例为 ${actualZoomScale}%。`);
-				} catch (err) {
-					showErrorToast(err);
-					console.error(err);
-				} finally {
-					// 删除放置的线段
-					deleteLinesByNetOnDocumentLayer('h0wB!g!$!t');
-				}
 			});
 		</script>
 	</body>

@@ -1,51 +1,33 @@
-[简体中文](#) | [English](./README.en.md) | [繁體中文](./README.zh-Hant.md) | [日本語](./README.ja.md) | [Русский](./README.ru.md)
+# 🤔到底有多大？
 
-# pro-api-sdk
+## 前言
 
-嘉立创EDA & EasyEDA 专业版扩展 API 开发工具
+一个用于把 PCB 在屏幕上的长度精确映射为现实尺寸的小工具。通过在屏幕上标定一段已知长度的线段，计算并应用缩放系数，从而可以以真实尺寸预览。只需对一个显示器测量一次即可保存校准数据，支持暗色模式，界面简洁、轻量并且离线运行。
 
-<a href="https://github.com/easyeda/pro-api-sdk" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/github/stars/easyeda/pro-api-sdk" alt="GitHub Repo Stars" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>&nbsp;<a href="https://github.com/easyeda/pro-api-sdk/issues" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/github/issues/easyeda/pro-api-sdk" alt="GitHub Issues" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>&nbsp;<a href="https://github.com/easyeda/pro-api-sdk" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/github/repo-size/easyeda/pro-api-sdk" alt="GitHub Repo Size" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>&nbsp;<a href="https://choosealicense.com/licenses/apache-2.0/" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/github/license/easyeda/pro-api-sdk" alt="GitHub License" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>&nbsp;<a href="https://www.npmjs.com/package/@jlceda/pro-api-types" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/npm/v/%40jlceda%2Fpro-api-types?label=pro-api-types" alt="NPM Version" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>&nbsp;<a href="https://www.npmjs.com/package/@jlceda/pro-api-types" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/npm/d18m/%40jlceda%2Fpro-api-types" alt="NPM Downloads" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>
+![](./images/day.png)
 
-> [!NOTE]
->
-> 详细开发文档请访问：[https://prodocs.lceda.cn/cn/api/guide/](https://prodocs.lceda.cn/cn/api/guide/)
+## 用法
 
-## 进入开发
+1. 安装插件，勾选配置中的“显示在顶部菜单”，并打开插件
 
-本开发工具组包含了用于开发 [嘉立创EDA专业版](https://pro.lceda.cn/) 扩展包的所有环境和工具，并内置了 Prettier 和 ESLint 的推荐规则。
+![](./images/setup.png)
 
-1. 克隆 [pro-api-sdk](https://github.com/easyeda/pro-api-sdk) 项目仓库到本地
+2. 点击步骤一的按钮，在PCB上放置一个线段，如果在显示器上过长或过短，可以对参数进行相应的调整
 
-    Gitee:
+3. 量出线段在你的显示器上的实际长度
 
-    ```shell
-    git clone --depth=1 https://gitee.com/jlceda/pro-api-sdk.git
-    ```
+![](./images/measure.jpg)
 
-    GitHub:
+4. 将量出的实际长度填入输入框
 
-    ```shell
-    git clone --depth=1 https://github.com/easyeda/pro-api-sdk.git
-    ```
+5. 点击执行缩放
 
-2. 初始化开发环境（安装依赖）
+6. Enjoy
 
-    ```shell
-    npm install
-    ```
+![](./images/show.jpg)
 
-3. 进行些许变更 ...
+## 其他
 
-4. 编译扩展包
-
-    ```shell
-    npm run build
-    ```
-
-5. 在 嘉立创EDA专业版 中安装生成在 `./build/dist/` 下的扩展包
-
-## 开源许可
-
-<a href="https://choosealicense.com/licenses/apache-2.0/" style="vertical-align: inherit;" target="_blank"><img src="https://img.shields.io/github/license/easyeda/pro-api-sdk" alt="GitHub License" class="not-medium-zoom-image" style="display: inline; vertical-align: inherit;" /></a>
-
-本开发工具组使用 [Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/) 开源许可协议，你仅可以将 **嘉立创EDA**、**EasyEDA** 商标信息用于依托于本工具组开发的扩展包的 **功能描述部分** 和 **开源发布的标题部分**。
+- 如果遇到BUG， 先尝试重置一下，如果仍不能解决，请评论并尽量完整地描述问题，有空会修复
+- 代码以 Apache-2.0 协议开源，随意使用无需询问，源代码请查阅 [GitHub](https://github.com/eext-kap1bala/howBigIsIt)
+- 大部分样式代码由 Copilot 生成，感谢它把我从重复劳动中解放出来

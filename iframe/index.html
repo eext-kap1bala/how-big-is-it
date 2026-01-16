@@ -377,7 +377,9 @@
 		</div>
 
 		<script>
+			// 用于临时创建线段的唯一网络名称，以避免与用户创建的网络冲突
 			const CREATE_LINE_NET = 'h0wB!g!$!t';
+
 			const MM_TO_MIL = 39.37;
 
 			// 根据 net 删除 Document 层的线段
@@ -450,24 +452,24 @@
 
 					// 在 PCB 上放置线段
 					await eda.pcb_PrimitiveLine.create(
-							CREATE_LINE_NET,
-							EPCB_LayerId.DOCUMENT,
-							parseFloat(originX.value) * MM_TO_MIL,
-							parseFloat(originY.value) * MM_TO_MIL,
-							parseFloat(originX.value) * MM_TO_MIL + parseFloat(segmentLength.value) * MM_TO_MIL,
-							parseFloat(originY.value) * MM_TO_MIL
-						);
+						CREATE_LINE_NET,
+						EPCB_LayerId.DOCUMENT,
+						parseFloat(originX.value) * MM_TO_MIL,
+						parseFloat(originY.value) * MM_TO_MIL,
+						parseFloat(originX.value) * MM_TO_MIL + parseFloat(segmentLength.value) * MM_TO_MIL,
+						parseFloat(originY.value) * MM_TO_MIL,
+					);
 
 					eda.sys_Message.showToastMessage(
 						'线段已放置，请切换回 PCB 编辑器测量线段长度，测量期间请勿缩放。',
-						ESYS_ToastMessageType.SUCCESS
+						ESYS_ToastMessageType.SUCCESS,
 					);
 
 					// 执行缩放
 					await eda.dmt_EditorControl.zoomTo(
 						parseFloat(originX.value) * MM_TO_MIL,
 						parseFloat(originY.value) * MM_TO_MIL,
-						parseFloat(zoomScale.value) / 100
+						parseFloat(zoomScale.value) / 100,
 					);
 				} catch (err) {
 					showErrorToast(err);
@@ -475,7 +477,7 @@
 			});
 
 			// 点击“看看到底有多大”按钮
-			showConfigBtn.addEventListener('click', () => {
+			showConfigBtn.addEventListener('click', async () => {
 				try {
 					// 获取当前缩放比例
 					const _zoomScale = parseFloat(zoomScale.value);
@@ -486,7 +488,7 @@
 					const actualZoomScale = (_segmentLength / _displayActualLength) * zoomScale.value;
 
 					// 执行缩放
-					eda.dmt_EditorControl.zoomTo(0, 0, actualZoomScale / 100);
+					await eda.dmt_EditorControl.zoomTo(0, 0, actualZoomScale / 100);
 
 					// 显示结果
 					eda.sys_Message.showToastMessage(
@@ -497,7 +499,7 @@
 					showErrorToast(err);
 				} finally {
 					// 删除放置的线段
-					deleteLinesByNetOnDocumentLayer(CREATE_LINE_NET);
+					await deleteLinesByNetOnDocumentLayer(CREATE_LINE_NET);
 				}
 			});
 
